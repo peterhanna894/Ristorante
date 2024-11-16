@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu del Ristorante</title>
+    <!-- Link a Bootstrap 5 per uno stile più moderno -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #788999;
+            font-family: 'Lora', serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        /* Selezione lingua */
+        #language-selection {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            background: linear-gradient(135deg, #717171,#4b4b4b );
+            color: white;
+            opacity: 1;
+            transition: opacity 0.5s ease-out;
+            text-align: center;
+        }
+
+        .logo-container img {
+    width: 250px;
+    padding: 10px;
+    margin-bottom: 30px;
+    filter: brightness(0) invert(1);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5), /* bagliore morbido */
+                0 0 20px rgba(255, 127, 80, 0.7),  /* effetto corallo */
+                0 0 30px rgba(255, 127, 80, 0.9);  /* bagliore più intenso */
+    border-radius: 10px; /* opzionale: arrotonda gli angoli */
+}
+
+
+        h3 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .btn-language {
+            margin: 10px;
+            padding: 15px 30px;
+            font-size: 18px;
+            background-color: #ffffff;
+            color: #343a40;
+            border: none;
+            border-radius: 30px;
+            transition: transform 0.3s, background-color 0.3s;
+            width: 220px;
+        }
+
+        .btn-language:hover {
+            background-color: #464646;
+            transform: scale(1.05);
+        }
+
+        #menu-container {
+            display: none;
+            transition: opacity 0.5s ease-in;
+        }
+
+        /* Navbar categoria */
+        .navbar {
+            background-color: #343a40;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-nav .nav-item .nav-link {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 600;
+            padding: 15px 20px;
+            transition: color 0.3s ease;
+        }
+
+        .navbar-nav .nav-item .nav-link:hover {
+            color: #ff9900;
+        }
+
+        /* Container articoli */
+        .category-row {
+            background-color: #717171;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            padding: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s;
+            margin: 10px 5px;
+
+        }
+
+
+        .category-row:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
+            background-color: #f5f5f5;
+        }
+
+        .category-header {
+            background-color: #343a40;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .row-item {
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.1rem;
+        }
+
+        .price {
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        .container-menu {
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Selezione della lingua -->
+<div id="language-selection">
+    <div class="logo-container">
+        <img src="/Logo Hostaria Farnese.png" alt="Logo Ristorante">
+    </div>
+    <h3>Seleziona la lingua</h3>
+    <div>
+        <button class="btn-language" onclick="setLanguage('ita')">Italiano</button>
+        <button class="btn-language" onclick="setLanguage('eng')">Inglese</button>
+    </div>
+</div>
+
+<!-- Menu del ristorante -->
+<div id="menu-container" class="container mt-5">
+    <h1 class="text-center mb-4">Menu del Ristorante</h1>
+    
+    <!-- Navbar per le categorie -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mt-4">
+        <div class="container-fluid">
+            <ul class="navbar-nav" id="categories-nav">
+                <!-- Le categorie verranno caricate qui -->
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Container per gli articoli -->
+    <div class="container-menu mt-4" id="articoli-container">
+        <!-- Gli articoli della categoria selezionata verranno caricati qui -->
+    </div>
+</div>
+
+<script>
+    let language = "ita"; // Lingua di default
+
+    // Funzione per impostare la lingua in base alla selezione dell'utente
+    function setLanguage(selectedLanguage) {
+        language = selectedLanguage;
+        document.getElementById('language-selection').style.opacity = 0; // Nasconde la selezione lingua
+        setTimeout(() => {
+            document.getElementById('language-selection').style.display = 'none'; // Nasconde il contenitore
+            document.getElementById('menu-container').style.display = 'block'; // Mostra il menu
+            getCategories(); // Carica le categorie
+        }, 500);
+    }
+
+    // Funzione per recuperare le categorie
+    async function getCategories() {
+        const response = await fetch("http://localhost:8080/categorie");
+        const categories = await response.json();
+        displayCategories(categories);
+    }
+
+    // Funzione per visualizzare le categorie come Navbar
+    function displayCategories(categories) {
+        const container = document.getElementById("categories-nav");
+        container.innerHTML = ""; // Pulisce il contenitore prima di aggiungere nuove categorie
+
+        categories.forEach(category => {
+            const listItem = document.createElement("li");
+            listItem.classList.add("nav-item");
+
+            listItem.innerHTML = `
+                <a class="nav-link" href="#" onclick="getArticoliByCategory(${category.id})">
+                    ${language === "ita" ? category.nomeIta : category.nomeIng}
+                </a>
+            `;
+            container.appendChild(listItem);
+        });
+    }
+
+    // Funzione per recuperare gli articoli per una data categoria
+    async function getArticoliByCategory(categoryId) {
+        const response = await fetch(`http://localhost:8080/articoli/categ/${categoryId}`);
+        const articoli = await response.json();
+        displayArticoli(articoli);
+    }
+
+    // Funzione per visualizzare gli articoli della categoria come righe
+    function displayArticoli(articoli) {
+        const container = document.getElementById("articoli-container");
+        container.innerHTML = ""; // Pulisce la vista degli articoli
+
+        articoli.forEach(articolo => {
+            const row = document.createElement("div");
+            row.classList.add("category-row", "row");
+
+            row.innerHTML = `
+                <div class="category-header">
+                    ${language === "ita" ? articolo.nomeIta : articolo.nomeIng}
+                </div>
+                <div class="row-item">
+                    <span>${language === "ita" ? articolo.descrIta : articolo.descrIng}</span>
+                    <span class="price">${articolo.prezzo} €</span>
+                </div>
+            `;
+            container.appendChild(row);
+        });
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+</body>
+</html>
